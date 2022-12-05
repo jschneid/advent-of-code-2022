@@ -41,11 +41,7 @@ def perform_all_crate_moves(moves, stacks)
 end
 
 def top_crates_string(stacks)
-  result = ''
-  stacks.each do |stack|
-    result += stack.last
-  end
-  result
+  stacks.map(&:last).join
 end
 
 lines = File.readlines('input.txt', chomp: true)
