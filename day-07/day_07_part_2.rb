@@ -11,10 +11,10 @@ def increase_size_of_directories_in_stack(directory_stack, directory_sizes, file
   end
 end
 
-def smallest_directory_size_greater_than_threshold(directory_sizes, threshold)
+def smallest_directory_size_of_at_least_threshold(directory_sizes, threshold)
   result = 70_000_000
   directory_sizes.values.each do |size|
-    result = size if size > threshold && size < result
+    result = size if size >= threshold && size < result
   end
   result
 end
@@ -43,4 +43,4 @@ total_disk_space_in_use = directory_sizes['/']
 unused_space = 70_000_000 - total_disk_space_in_use
 additional_free_space_required = 30_000_000 - unused_space
 
-p smallest_directory_size_greater_than_threshold(directory_sizes, additional_free_space_required)
+p smallest_directory_size_of_at_least_threshold(directory_sizes, additional_free_space_required)
