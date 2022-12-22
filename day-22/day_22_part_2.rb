@@ -5,8 +5,12 @@
 # de
 # f
 #
-# So... I actually did arts and crafts and made that cube on actual paper and folded it.
-# It yields mappings:
+# So... I actually did a 2:00am arts and crafts project, and made that cube on
+# actual paper and folded it! Check it out!
+#
+# https://jonschneider.com/images/jsblog/AdventOfCodeDay22Part2.jpg
+#
+# It yields mappings (new facings):
 #
 # a:
 # - right: b (right)
@@ -43,8 +47,12 @@
 # - down: b (down)
 # - left: a (down)
 # - up: d (up)
-
-
+#
+# (The specific code below won't work with inputs that are in a different
+# unfolded shape! The "get_face" and "wrap" functions would need to be
+# adapted for the new shape. Alternatively, I could come up with logic
+# that could dynamically come up with the math required, given any possible
+# input... but I'm not taking that on at this time!)
 
 class Go
   attr_reader :steps
@@ -57,42 +65,21 @@ class Go
 
   def perform(map, x, y, facing)
     @steps.times do
-      next_x, next_y = next_position(map, x, y, facing)
+      next_x, next_y = next_position(x, y, facing)
       next_facing = facing
-
-      # p "(#{next_x},#{next_y})"
 
       break if map[next_y] != nil && map[next_y][next_x] == '#'
 
-      wrapped = false # todo: can remove when working
       if next_x < 0 || next_y < 0 || map[next_y].nil? || map[next_y][next_x] != '.'
-        next_x, next_y, next_facing = wrap(map, x, y, facing)
-        wrapped = true # todo: can remove when working
-      end
-
-      # todo: can remove when working
-      if map[next_y].nil?
-        raise "Error: y=#{next_y}"
+        next_x, next_y, next_facing = wrap(x, y, facing)
       end
 
       break if map[next_y][next_x] == '#'
 
-      # todo: can remove when working
-      if !wrapped
-        if get_face(x, y) != get_face(next_x, next_y)
-          p "walked from face #{get_face(x, y)} to #{get_face(next_x, next_y)} without wrapping"
-        end
-      end
-
       x = next_x
       y = next_y
       facing = next_facing
-
-      # p "- moved to x #{x} y #{y}"
-
     end
-
-    # p "moved #{@steps} to x #{x} y #{y}"
 
     [x, y, facing]
   end
@@ -111,17 +98,17 @@ class Go
     elsif y >= 150 && y < 200 && x >= 0 && x < 50
       :f
     else
-      raise "Error: invalid face for y=#{y} x=#{x}"
+      raise "Error: Invalid face for y=#{y} x=#{x}"
     end
   end
 
-  def wrap(map, x, y, facing)
+  def wrap(x, y, facing)
     next_x = x
     next_y = y
     next_facing = facing
 
     face = get_face(x, y)
-    # p "- wrapping, facing=#{facing} x=#{x} y=#{y} face=#{face}"
+
     case facing
     when 0
       case face
@@ -130,7 +117,7 @@ class Go
       when :b
         next_facing = 2
         next_x = 99
-        next_y = 150 - y
+        next_y = 149 - y
       when :c
         next_facing = 3
         next_x = y + 50
@@ -140,7 +127,7 @@ class Go
       when :e
         next_facing = 2
         next_x = 149
-        next_y = 150 - y
+        next_y = 149 - y
       when :f
         next_facing = 3
         next_x = y - 100
@@ -171,7 +158,7 @@ class Go
       when :a
         next_facing = 0
         next_x = 0
-        next_y = 150 - y
+        next_y = 149 - y
       when :b
         next_x = x - 1
       when :c
@@ -181,7 +168,7 @@ class Go
       when :d
         next_facing = 0
         next_x = 50
-        next_y = 150 - y
+        next_y = 149 - y
       when :e
         next_x = x - 1
       when :f
@@ -209,22 +196,14 @@ class Go
       when :f
         next_y = 149
       end
+    else
+      raise "Error: Unknown facing #{facing}"
     end
-
-    p "- wrapped from (dir #{facing}, x #{x} y #{y}) face #{face.to_s} to (dir #{next_facing}, x #{next_x} y #{next_y}) face #{get_face(next_x, next_y).to_s} [#{map[next_y][next_x]}]"
 
     [next_x, next_y, next_facing]
   end
 
-  # def map_width(map)
-  #   @map_width || map.map(&:length).max
-  # end
-  #
-  # def map_height(map)
-  #   @map_height || map.length
-  # end
-
-  def next_position(map, x, y, facing)
+  def next_position(x, y, facing)
     next_x = x
     next_y = y
     case facing
@@ -254,8 +233,6 @@ class Turn
     facing -= 1 if @turn == 'L'
     facing = facing % 4
 
-    # p "turned #{@turn} to #{facing}"
-
     [x, y, facing]
   end
 end
@@ -280,16 +257,12 @@ def perform_moves(moves, map)
   x = map.first.chars.find_index { |c| c == '.' }
   facing = 0
 
-  p "Starting at x #{x} y #{y}"
-
   moves.each do |move|
     x, y, facing = move.perform(map, x, y, facing)
   end
 
   [x, y, facing]
 end
-
-
 
 def final_password(x, y, facing)
   (y + 1) * 1000 + (x + 1) * 4 + facing
@@ -302,9 +275,5 @@ map = data.reject(&:empty?)
 
 x, y, facing = perform_moves(moves, map)
 
-p "ended at x #{x} y #{y} facing #{facing}"
-p final_password(x, y, facing)
-
-# 34601 too low
-# 78400 too low
-# 121067 too low
+p "Ended at x #{x} y #{y}, facing #{facing}"
+p "Final password: #{final_password(x, y, facing)}"
