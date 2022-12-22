@@ -64,14 +64,25 @@ class Go
 
       break if map[next_y] != nil && map[next_y][next_x] == '#'
 
-      next_x, next_y, next_facing = wrap(map, x, y, facing) if next_x < 0 || next_y < 0 || map[next_y].nil? || map[next_y][next_x] != '.'
+      wrapped = false # todo: can remove when working
+      if next_x < 0 || next_y < 0 || map[next_y].nil? || map[next_y][next_x] != '.'
+        next_x, next_y, next_facing = wrap(map, x, y, facing)
+        wrapped = true # todo: can remove when working
+      end
 
-
+      # todo: can remove when working
       if map[next_y].nil?
         raise "Error: y=#{next_y}"
       end
 
       break if map[next_y][next_x] == '#'
+
+      # todo: can remove when working
+      if !wrapped
+        if get_face(x, y) != get_face(next_x, next_y)
+          p "walked from face #{get_face(x, y)} to #{get_face(next_x, next_y)} without wrapping"
+        end
+      end
 
       x = next_x
       y = next_y
@@ -87,9 +98,9 @@ class Go
   end
 
   def get_face(x, y)
-    if y < 50 && x >= 100 && x < 150
+    if y >= 0 && y < 50 && x >= 100 && x < 150
       :b
-    elsif y < 50 && x >= 50 && x < 100
+    elsif y >= 0 && y < 50 && x >= 50 && x < 100
       :a
     elsif y >= 50 && y < 100 && x >= 50 && x < 100
       :c
@@ -110,7 +121,7 @@ class Go
     next_facing = facing
 
     face = get_face(x, y)
-    p "- wrapping, facing=#{facing} x=#{x} y=#{y} face=#{face}"
+    # p "- wrapping, facing=#{facing} x=#{x} y=#{y} face=#{face}"
     case facing
     when 0
       case face
@@ -164,8 +175,8 @@ class Go
       when :b
         next_x = x - 1
       when :c
-        next_facing = 3
-        next_x = x - 50
+        next_facing = 1
+        next_x = y - 50
         next_y = 100
       when :d
         next_facing = 0
@@ -200,7 +211,7 @@ class Go
       end
     end
 
-    p "- wrapped from (dir #{facing} x #{x} y #{y}) face #{face.to_s} to (x #{next_x} y #{next_y}) face #{get_face(next_x, next_y).to_s}"
+    p "- wrapped from (dir #{facing}, x #{x} y #{y}) face #{face.to_s} to (dir #{next_facing}, x #{next_x} y #{next_y}) face #{get_face(next_x, next_y).to_s} [#{map[next_y][next_x]}]"
 
     [next_x, next_y, next_facing]
   end
@@ -294,5 +305,6 @@ x, y, facing = perform_moves(moves, map)
 p "ended at x #{x} y #{y} facing #{facing}"
 p final_password(x, y, facing)
 
+# 34601 too low
 # 78400 too low
 # 121067 too low
