@@ -99,10 +99,10 @@ def do_round_first_half(elves, direction_order)
 end
 
 def do_round_second_half(elves)
-  proposed_locations = elves.map(&:proposed_location)
+  proposed_locations_tally = elves.map(&:proposed_location).reject(&:nil?).tally
 
   elves.each do |elf|
-    elf.location = elf.proposed_location unless elf.proposed_location.nil? || proposed_locations.count(elf.proposed_location) > 1
+    elf.location = elf.proposed_location unless elf.proposed_location.nil? || proposed_locations_tally[elf.proposed_location] > 1
   end
 end
 

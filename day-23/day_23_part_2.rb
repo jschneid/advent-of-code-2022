@@ -99,11 +99,11 @@ def do_round_first_half(elves, direction_order)
 end
 
 def do_round_second_half(elves)
-  proposed_locations = elves.map(&:proposed_location)
+  proposed_locations_tally = elves.map(&:proposed_location).reject(&:nil?).tally
 
   any_elf_moved = false
   elves.each do |elf|
-    unless elf.proposed_location.nil? || proposed_locations.count(elf.proposed_location) > 1
+    unless elf.proposed_location.nil? || proposed_locations_tally[elf.proposed_location] > 1
       elf.location = elf.proposed_location
       any_elf_moved = true
     end
@@ -131,6 +131,8 @@ def read_elves
   elves
 end
 
+start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 elves = read_elves
 
 direction_order = [:N, :S, :W, :E]
@@ -141,3 +143,6 @@ loop do
 end
 
 p round
+
+end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+p "Runtime was: #{end_time - start_time} seconds"
